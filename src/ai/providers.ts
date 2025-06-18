@@ -6,10 +6,13 @@ import {
   wrapLanguageModel,
 } from 'ai';
 import { getEncoding } from 'js-tiktoken';
-
 import { RecursiveCharacterTextSplitter } from './text-splitter';
 
-// Providers
+/* ────────────────────────────────────────────────────────────────────────────
+   PROVIDERS
+   ────────────────────────────────────────────────────────────────────────── */
+
+/** Standard OpenAI-hosted or Azure-style endpoint */
 const openai = process.env.OPENAI_KEY
   ? createOpenAI({
       apiKey: process.env.OPENAI_KEY,
@@ -17,20 +20,39 @@ const openai = process.env.OPENAI_KEY
     })
   : undefined;
 
+/** Fireworks.ai provider */
 const fireworks = process.env.FIREWORKS_KEY
-  ? createFireworks({
-      apiKey: process.env.FIREWORKS_KEY,
+  ? createFireworks({ apiKey: process.env.FIREWORKS_KEY })
+  : undefined;
+
+/** Ollama or any other OpenAI-compatible host (Groq, Together, etc.) */
+const ollama = process.env.OLLAMA_BASE_URL
+  ? createOpenAI({
+      // any non-empty string placates the SDK; Ollama ignores it
+      apiKey: process.env.OLLAMA_API_KEY || 'ollama-key',
+      baseURL: process.env.OLLAMA_BASE_URL, // e.g. http://localhost:11434/v1
     })
   : undefined;
 
-const customModel = process.env.CUSTOM_MODEL
-  ? openai?.(process.env.CUSTOM_MODEL, {
-      structuredOutputs: true,
-    })
+/* ────────────────────────────────────────────────────────────────────────────
+   MODEL INSTANCES
+   ────────────────────────────────────────────────────────────────────────── */
+
+/** User-supplied env vars to force a model */
+const CUSTOM_MODEL = process.env.CUSTOM_MODEL;   // for OpenAI/Fireworks
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL;   // e.g. qwen3:8b
+
+/** Highest-priority: explicit Ollama model */
+const ollamaModel = OLLAMA_MODEL && ollama
+  ? ollama(OLLAMA_MODEL, { structuredOutputs: true })
   : undefined;
 
-// Models
+/** Next priority: any other custom model ID */
+const customModel = CUSTOM_MODEL && openai
+  ? openai(CUSTOM_MODEL, { structuredOutputs: true })
+  : undefined;
 
+/** Default canned choices */
 const o3MiniModel = openai?.('o3-mini', {
   reasoningEffort: 'medium',
   structuredOutputs: true,
@@ -45,54 +67,54 @@ const deepSeekR1Model = fireworks
     })
   : undefined;
 
+/* ────────────────────────────────────────────────────────────────────────────
+   EXPORTED FACTORY
+   ────────────────────────────────────────────────────────────────────────── */
+
 export function getModel(): LanguageModelV1 {
-  if (customModel) {
-    return customModel;
-  }
+  const model =
+    // precedence order
+    ollamaModel ??
+    customModel ??
+    deepSeekR1Model ??
+    o3MiniModel;
 
-  const model = deepSeekR1Model ?? o3MiniModel;
   if (!model) {
-    throw new Error('No model found');
+    throw new Error('No language model is configured.  Set OPENAI_KEY, FIREWORKS_KEY, or OLLAMA_BASE_URL + OLLAMA_MODEL in .env');
   }
 
-  return model as LanguageModelV1;
+  return model;
 }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   UTILS
+   ────────────────────────────────────────────────────────────────────────── */
 
 const MinChunkSize = 140;
 const encoder = getEncoding('o200k_base');
 
-// trim prompt to maximum context size
 export function trimPrompt(
   prompt: string,
   contextSize = Number(process.env.CONTEXT_SIZE) || 128_000,
 ) {
-  if (!prompt) {
-    return '';
-  }
+  if (!prompt) return '';
 
   const length = encoder.encode(prompt).length;
-  if (length <= contextSize) {
-    return prompt;
-  }
+  if (length <= contextSize) return prompt;
 
   const overflowTokens = length - contextSize;
-  // on average it's 3 characters per token, so multiply by 3 to get a rough estimate of the number of characters
   const chunkSize = prompt.length - overflowTokens * 3;
-  if (chunkSize < MinChunkSize) {
-    return prompt.slice(0, MinChunkSize);
-  }
+
+  if (chunkSize < MinChunkSize) return prompt.slice(0, MinChunkSize);
 
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize,
     chunkOverlap: 0,
   });
-  const trimmedPrompt = splitter.splitText(prompt)[0] ?? '';
+  const trimmed = splitter.splitText(prompt)[0] ?? '';
 
-  // last catch, there's a chance that the trimmed prompt is same length as the original prompt, due to how tokens are split & innerworkings of the splitter, handle this case by just doing a hard cut
-  if (trimmedPrompt.length === prompt.length) {
-    return trimPrompt(prompt.slice(0, chunkSize), contextSize);
-  }
-
-  // recursively trim until the prompt is within the context size
-  return trimPrompt(trimmedPrompt, contextSize);
+  return trimmed.length === prompt.length
+    ? trimPrompt(prompt.slice(0, chunkSize), contextSize)
+    : trimPrompt(trimmed, contextSize);
 }
+
