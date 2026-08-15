@@ -41,7 +41,8 @@ lemma complCrossCount_le_degree (G : SimpleGraph α) [DecidableRel G.Adj]
   rw [← Gᶜ.card_neighborFinset_eq_degree]
   apply Finset.card_le_card
   intro i hi
-  exact Finset.mem_neighborFinset.mpr (Finset.mem_filter.mp hi).2
+  have hadj : Gᶜ.Adj x i := (Finset.mem_filter.mp hi).2
+  simpa using hadj
 
 lemma card_le_cross_add_compl_degree (G : SimpleGraph α) [DecidableRel G.Adj]
     (I : Finset α) {x : α} (hx : x ∉ I) :
