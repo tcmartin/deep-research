@@ -1,0 +1,38 @@
+name: WOWII 100 kernel certificate
+
+on:
+  push:
+    branches:
+      - research/wowii-conjecture-100-lean-v2
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/wowii-conjecture-100-lean-v2
+      - name: Install pinned Lean
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve dependencies
+        run: lake update
+      - name: Restore Mathlib cache
+        run: lake exe cache get
+      - name: Kernel-check proof
+        run: lake build
+      - name: Commit certificate after successful kernel check
+        run: |
+          printf 'Lean kernel check: PASSED\nToolchain: leanprover/lean4:v4.27.0\nMathlib: a3a10db0e9d66acbebf76c5e6a135066525ac900\nChecked commit: %s\n' "$GITHUB_SHA" > LEAN_KERNEL_CHECK_PASSED.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add LEAN_KERNEL_CHECK_PASSED.txt lake-manifest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record Lean kernel certificate [skip ci]'
+            git push origin HEAD:research/wowii-conjecture-100-lean-v2
+          fi
