@@ -13,5 +13,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
         with:
-          build: true
+          auto-config: false
+          build: false
+          test: false
+          lint: false
           use-github-cache: true
+      - name: Resolve pinned dependencies
+        run: lake update
+      - name: Restore Mathlib and Formal Conjectures cache
+        run: lake exe cache get
+      - name: Kernel-check the project
+        run: lake build
