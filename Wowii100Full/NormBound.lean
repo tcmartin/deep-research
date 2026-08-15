@@ -19,6 +19,12 @@ lemma inside_compl_degree_balance (G : SimpleGraph α) [DecidableRel G.Adj]
   have hdeg : G.degree i ≤ Iᶜ.card := degree_le_outside_card G I hI hi
   have hcard : Iᶜ.card = Fintype.card α - I.card := Finset.card_compl I
   have hIcard : I.card ≤ Fintype.card α := Finset.card_le_univ I
+  have hIpos : 0 < I.card := Finset.card_pos.mpr ⟨i, hi⟩
+  have htotal : I.card + Iᶜ.card = Fintype.card α := by
+    rw [hcard]
+    omega
+  have hdeg1 : G.degree i + 1 ≤ Fintype.card α := by
+    omega
   have hdc : Gᶜ.degree i = Fintype.card α - 1 - G.degree i := by
     simpa using (G.degree_compl (v := i))
   have hnat : Gᶜ.degree i + G.degree i + 1 = I.card + Iᶜ.card := by
@@ -44,12 +50,11 @@ lemma inside_compl_degree_sum_lower (G : SimpleGraph α) [DecidableRel G.Adj]
           ∑ i ∈ I, ((Gᶜ.degree i : ℝ) + (G.degree i : ℝ) + 1) := by
             simp_rw [Finset.sum_add_distrib]
             simp
-            ring
       _ = ∑ i ∈ I, ((I.card : ℝ) + (Iᶜ.card : ℝ)) := by
             apply Finset.sum_congr rfl
             intro i hi
             exact inside_compl_degree_balance G I hI hi
-      _ = (I.card : ℝ) * ((I.card : ℝ) + (Iᶜ.card : ℝ)) := by simp [mul_comm]
+      _ = (I.card : ℝ) * ((I.card : ℝ) + (Iᶜ.card : ℝ)) := by ring
   nlinarith
 
 lemma outside_sq_sum_lower (G : SimpleGraph α) [DecidableRel G.Adj]
@@ -79,7 +84,6 @@ lemma inside_cauchy (G : SimpleGraph α) [DecidableRel G.Adj] (I : Finset α) :
       (fun i => (Gᶜ.degree i : ℝ))
   simpa using h
 
-/-- The lower bound on the squared complement degree norm that feeds the sharp arithmetic core. -/
 theorem scaled_norm_lower_bound (G : SimpleGraph α) [DecidableRel G.Adj]
     (I : Finset α) (hI : G.IsNIndepSet G.indepNum I) :
     ((G.indepNum : ℝ) * ((G.indepNum : ℝ) - 1) +
