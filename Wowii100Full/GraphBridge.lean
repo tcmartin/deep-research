@@ -66,6 +66,9 @@ lemma cross_double_count (G : SimpleGraph α) [DecidableRel G.Adj]
   intro x hx
   apply Finset.sum_congr rfl
   intro i hi
-  rw [G.adj_comm]
+  by_cases hix : G.Adj i x
+  · simp [hix, G.adj_comm.mp hix]
+  · have hxi : ¬ G.Adj x i := by simpa [G.adj_comm] using hix
+    simp [hix, hxi]
 
 end Wowii100Full
