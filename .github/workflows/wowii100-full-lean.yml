@@ -15,9 +15,7 @@ jobs:
         run: |
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Resolve dependencies
+      - name: Resolve dependencies and Mathlib cache
         run: lake update
-      - name: Restore caches
-        run: lake exe cache get
       - name: Kernel-check proof
         run: lake build
