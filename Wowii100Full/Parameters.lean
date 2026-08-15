@@ -33,6 +33,21 @@ lemma indepNum_pos [Nonempty α] (G : SimpleGraph α) : 0 < G.indepNum := by
   have hle := hsingle.card_le_indepNum
   simpa using hle
 
+lemma one_le_maxLocalIndep_of_connected [Nontrivial α]
+    (G : SimpleGraph α) [DecidableRel G.Adj] (hconn : G.Connected) :
+    1 ≤ maxLocalIndep G := by
+  classical
+  let v : α := Classical.choice (inferInstance : Nonempty α)
+  have hd : 0 < G.degree v := hconn.preconnected.degree_pos_of_nontrivial v
+  obtain ⟨w, hw⟩ := (G.degree_pos_iff_exists_adj v).mp hd
+  let w' : G.neighborSet v := ⟨w, hw⟩
+  have hs : (G.induce (G.neighborSet v)).IsIndepSet ({w'} : Finset (G.neighborSet v)) := by
+    simp
+  have hlocal : 1 ≤ indepNeighborsCard G v := by
+    have hle := hs.card_le_indepNum
+    simpa [indepNeighborsCard] using hle
+  exact hlocal.trans (local_le_maxLocalIndep G v)
+
 /-- For a maximum independent set `I`, if `m` is the number of vertices outside `I`
 and `L` is the maximum neighborhood independence number, connectedness gives `α ≤ mL`. -/
 lemma indepNum_le_outside_mul_maxLocal [Nontrivial α]
