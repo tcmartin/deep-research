@@ -1,0 +1,29 @@
+name: Graffiti 100 Lean check
+
+on:
+  push:
+    branches:
+      - codex/graffiti-conjecture-100
+    paths:
+      - "graffiti100/**"
+      - ".github/workflows/graffiti100-lean.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with Lean 4.27 and mathlib
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: graffiti100
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
+          use-github-cache: true
