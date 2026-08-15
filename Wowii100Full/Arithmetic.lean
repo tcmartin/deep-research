@@ -1,4 +1,4 @@
-import FormalConjectures.WrittenOnTheWallII.GraphConjecture100
+import Wowii100Full.Base
 
 namespace Wowii100Full
 
