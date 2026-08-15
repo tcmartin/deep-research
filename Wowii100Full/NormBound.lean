@@ -53,7 +53,8 @@ lemma inside_compl_degree_sum_lower (G : SimpleGraph α) [DecidableRel G.Adj]
             apply Finset.sum_congr rfl
             intro i hi
             exact inside_compl_degree_balance G I hI hi
-      _ = (I.card : ℝ) * ((I.card : ℝ) + (Iᶜ.card : ℝ)) := by ring
+      _ = (I.card : ℝ) * ((I.card : ℝ) + (Iᶜ.card : ℝ)) := by
+            simp <;> ring
   nlinarith
 
 lemma outside_sq_sum_lower (G : SimpleGraph α) [DecidableRel G.Adj]
