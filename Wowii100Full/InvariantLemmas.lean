@@ -13,11 +13,20 @@ lemma indepNeighborsCard_le_indepNum (G : SimpleGraph α) [DecidableRel G.Adj] (
   let H := G.induce (G.neighborSet v)
   obtain ⟨s, hs⟩ := H.exists_isNIndepSet_indepNum
   let e : (G.neighborSet v) ↪ α := ⟨Subtype.val, Subtype.val_injective⟩
-  have hsG : G.IsNIndepSet H.indepNum (s.map e) := by
-    rw [← SimpleGraph.isNIndepSet_induce]
-    simpa [H, e] using hs
-  have hle := hsG.isIndepSet.card_le_indepNum
-  rw [hsG.card_eq] at hle
+  have hSI : G.IsIndepSet (s.map e) := by
+    intro y hy z hz hyz
+    simp only [Finset.mem_map] at hy hz
+    obtain ⟨y', hy', rfl⟩ := hy
+    obtain ⟨z', hz', rfl⟩ := hz
+    have hne : y' ≠ z' := by
+      intro h
+      apply hyz
+      exact congrArg Subtype.val h
+    exact hs.isIndepSet hy' hz' hne
+  have hle := hSI.card_le_indepNum
+  have hcard : (s.map e).card = H.indepNum := by
+    simpa using hs.card_eq
+  rw [hcard] at hle
   simpa [H, indepNeighborsCard] using hle
 
 end Wowii100Full
