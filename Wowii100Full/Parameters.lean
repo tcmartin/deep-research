@@ -5,7 +5,7 @@ namespace Wowii100Full
 open SimpleGraph
 open scoped BigOperators
 
-variable {α : Type*} [Fintype α] [DecidableEq α]
+variable {α : Type*} [Fintype α] [DecidableEq α] [Nonempty α]
 
 noncomputable def maxLocalIndep (G : SimpleGraph α) [DecidableRel G.Adj] : ℕ :=
   (Finset.univ.image (indepNeighborsCard G)).max' (by simp)
@@ -26,7 +26,7 @@ lemma maxLocalIndep_le_indepNum (G : SimpleGraph α) [DecidableRel G.Adj] :
   obtain ⟨v, hv, rfl⟩ := Finset.mem_image.mp hy
   exact indepNeighborsCard_le_indepNum G v
 
-lemma indepNum_pos [Nonempty α] (G : SimpleGraph α) : 0 < G.indepNum := by
+lemma indepNum_pos (G : SimpleGraph α) : 0 < G.indepNum := by
   classical
   let v : α := Classical.choice ‹Nonempty α›
   have hsingle : G.IsIndepSet ({v} : Finset α) := by simp
@@ -41,8 +41,7 @@ lemma one_le_maxLocalIndep_of_connected [Nontrivial α]
   have hd : 0 < G.degree v := hconn.preconnected.degree_pos_of_nontrivial v
   obtain ⟨w, hw⟩ := (G.degree_pos_iff_exists_adj v).mp hd
   let w' : G.neighborSet v := ⟨w, hw⟩
-  have hs : (G.induce (G.neighborSet v)).IsIndepSet ({w'} : Finset (G.neighborSet v)) := by
-    simp
+  have hs : (G.induce (G.neighborSet v)).IsIndepSet ({w'} : Finset (G.neighborSet v)) := by simp
   have hlocal : 1 ≤ indepNeighborsCard G v := by
     have hle := hs.card_le_indepNum
     simpa [indepNeighborsCard] using hle
@@ -61,8 +60,6 @@ lemma degree_sum_le_outside_mul_maxLocal
       exact (crossCount_le_local G I hI x).trans (local_le_maxLocalIndep G x)
     _ = Iᶜ.card * maxLocalIndep G := by simp
 
-/-- For a maximum independent set `I`, if `m` is the number of vertices outside `I`
-and `L` is the maximum neighborhood independence number, connectedness gives `α ≤ mL`. -/
 lemma indepNum_le_outside_mul_maxLocal [Nontrivial α]
     (G : SimpleGraph α) [DecidableRel G.Adj] (hconn : G.Connected)
     (I : Finset α) (hI : G.IsNIndepSet G.indepNum I) :
@@ -78,7 +75,9 @@ lemma indepNum_le_outside_mul_maxLocal [Nontrivial α]
         apply Finset.sum_le_sum
         intro i hi
         exact hdeg i hi
-  rw [hI.card_eq]
-  exact hlower.trans (degree_sum_le_outside_mul_maxLocal G I hI.isIndepSet)
+  calc
+    G.indepNum = I.card := hI.card_eq.symm
+    _ ≤ ∑ i ∈ I, G.degree i := hlower
+    _ ≤ Iᶜ.card * maxLocalIndep G := degree_sum_le_outside_mul_maxLocal G I hI.isIndepSet
 
 end Wowii100Full
