@@ -15,11 +15,15 @@ lemma outside_neighbor_count_eq_degree (G : SimpleGraph α) [DecidableRel G.Adj]
   rw [← G.card_neighborFinset_eq_degree]
   congr 1
   ext x
-  simp only [Finset.mem_filter, Finset.mem_compl, Finset.mem_neighborFinset]
   constructor
-  · exact fun h => h.2
-  · intro hix
+  · intro hx
+    have h := Finset.mem_filter.mp hx
+    simpa using h.2
+  · intro hx
+    have hix : G.Adj i x := by simpa using hx
+    apply Finset.mem_filter.mpr
     refine ⟨?_, hix⟩
+    simp only [Finset.mem_compl]
     intro hxI
     exact hI hi hxI (G.ne_of_adj hix) hix
 
@@ -30,15 +34,18 @@ lemma degree_sum_eq_cross_sum (G : SimpleGraph α) [DecidableRel G.Adj]
   rw [← cross_double_count G I Iᶜ]
   apply Finset.sum_congr rfl
   intro i hi
-  exact outside_neighbor_count_eq_degree G I hI hi
+  exact (outside_neighbor_count_eq_degree G I hI hi).symm
 
 lemma crossCount_zero_of_mem_indep (G : SimpleGraph α) [DecidableRel G.Adj]
     (I : Finset α) (hI : G.IsIndepSet I) {x : α} (hx : x ∈ I) :
     crossCount G I x = 0 := by
   classical
-  apply Finset.card_eq_zero.mpr
-  intro i hi
-  have hi' := Finset.mem_filter.mp hi
-  exact hI hx hi'.1 (G.ne_of_adj hi'.2) hi'.2
+  rw [Finset.card_eq_zero]
+  ext i
+  simp only [Finset.mem_filter, Finset.not_mem_empty, iff_false]
+  push_neg
+  intro hiI
+  intro hadj
+  exact hI hx hiI (G.ne_of_adj hadj) hadj
 
 end Wowii100Full
