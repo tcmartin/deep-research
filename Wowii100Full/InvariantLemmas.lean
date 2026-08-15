@@ -15,9 +15,12 @@ lemma indepNeighborsCard_le_indepNum (G : SimpleGraph α) [DecidableRel G.Adj] (
   let e : (G.neighborSet v) ↪ α := ⟨Subtype.val, Subtype.val_injective⟩
   have hSI : G.IsIndepSet (s.map e) := by
     intro y hy z hz hyz
-    simp only [Finset.mem_map] at hy hz
-    obtain ⟨y', hy', rfl⟩ := hy
-    obtain ⟨z', hz', rfl⟩ := hz
+    change y ∈ s.map e at hy
+    change z ∈ s.map e at hz
+    obtain ⟨y', hy', hyval⟩ := Finset.mem_map.mp hy
+    obtain ⟨z', hz', hzval⟩ := Finset.mem_map.mp hz
+    subst y
+    subst z
     have hne : y' ≠ z' := by
       intro h
       apply hyz
