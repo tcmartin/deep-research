@@ -6,6 +6,10 @@ on:
       - research/wowii-conjecture-100-full-lean
   workflow_dispatch:
 
+concurrency:
+  group: wowii100-full-lean-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
