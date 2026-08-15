@@ -40,12 +40,12 @@ lemma crossCount_zero_of_mem_indep (G : SimpleGraph α) [DecidableRel G.Adj]
     (I : Finset α) (hI : G.IsIndepSet I) {x : α} (hx : x ∈ I) :
     crossCount G I x = 0 := by
   classical
+  unfold crossCount
   rw [Finset.card_eq_zero]
   ext i
   simp only [Finset.mem_filter, Finset.not_mem_empty, iff_false]
   push_neg
-  intro hiI
-  intro hadj
+  intro hiI hadj
   exact hI hx hiI (G.ne_of_adj hadj) hadj
 
 end Wowii100Full
