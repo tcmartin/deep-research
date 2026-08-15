@@ -49,20 +49,8 @@ lemma card_le_cross_add_compl_degree (G : SimpleGraph α) [DecidableRel G.Adj]
   rw [← cross_add_complCross_eq_card G I hx]
   exact Nat.add_le_add_left (complCrossCount_le_degree G I x) _
 
-lemma outside_compl_degree_bound (G : SimpleGraph α) [DecidableRel G.Adj]
-    (I : Finset α) (hcard : I.card = G.indepNum) {x : α} (hx : x ∈ Iᶜ) :
-    G.indepNum ≤ maxLocalIndep G + Gᶜ.degree x := by
-  classical
-  have hxnot : x ∉ I := by simpa using hx
-  have hbase := card_le_cross_add_compl_degree G I hxnot
-  have hlocal := (crossCount_le_local G I (by
-      -- `I` is only used through its maximum-cardinality witness by callers; the independent-set
-      -- hypothesis is supplied in the strengthened lemma below.
-      sorry) x)
-  sorry
-
 /-- Pointwise complement-degree bound for vertices outside a maximum independent set. -/
-lemma outside_compl_degree_bound_of_indep (G : SimpleGraph α) [DecidableRel G.Adj]
+lemma outside_compl_degree_bound (G : SimpleGraph α) [DecidableRel G.Adj]
     (I : Finset α) (hI : G.IsNIndepSet G.indepNum I) {x : α} (hx : x ∈ Iᶜ) :
     G.indepNum ≤ maxLocalIndep G + Gᶜ.degree x := by
   classical
