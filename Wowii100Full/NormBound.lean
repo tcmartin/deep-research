@@ -23,8 +23,7 @@ lemma inside_compl_degree_balance (G : SimpleGraph α) [DecidableRel G.Adj]
   have htotal : I.card + Iᶜ.card = Fintype.card α := by
     rw [hcard]
     omega
-  have hdeg1 : G.degree i + 1 ≤ Fintype.card α := by
-    omega
+  have hdeg1 : G.degree i + 1 ≤ Fintype.card α := by omega
   have hdc : Gᶜ.degree i = Fintype.card α - 1 - G.degree i := by
     simpa using (G.degree_compl (v := i))
   have hnat : Gᶜ.degree i + G.degree i + 1 = I.card + Iᶜ.card := by
@@ -106,7 +105,13 @@ theorem scaled_norm_lower_bound (G : SimpleGraph α) [DecidableRel G.Adj]
         omega)
     have hLaR : (maxLocalIndep G : ℝ) ≤ G.indepNum := by
       exact_mod_cast maxLocalIndep_le_indepNum G
-    positivity
+    have ha0 : (0 : ℝ) ≤ G.indepNum := by positivity
+    have hm0 : (0 : ℝ) ≤ Iᶜ.card := by positivity
+    have haSub : 0 ≤ (G.indepNum : ℝ) - 1 := by linarith
+    have hdSub : 0 ≤ (G.indepNum : ℝ) - (maxLocalIndep G : ℝ) := by linarith
+    have h1 := mul_nonneg ha0 haSub
+    have h2 := mul_nonneg hm0 hdSub
+    nlinarith
   have hsum0 : 0 ≤ ∑ i ∈ I, (Gᶜ.degree i : ℝ) := by positivity
   have hBsq : B ^ 2 ≤ (I.card : ℝ) * ∑ i ∈ I, (Gᶜ.degree i : ℝ) ^ 2 := by
     calc
