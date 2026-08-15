@@ -5,7 +5,7 @@ namespace Wowii100Full
 open SimpleGraph
 open scoped BigOperators
 
-variable {α : Type*} [Fintype α] [DecidableEq α]
+variable {α : Type*} [Fintype α] [DecidableEq α] [Nonempty α]
 
 lemma degree_le_outside_card (G : SimpleGraph α) [DecidableRel G.Adj]
     (I : Finset α) (hI : G.IsIndepSet I) {i : α} (hi : i ∈ I) :
@@ -58,6 +58,7 @@ lemma outside_sq_sum_lower (G : SimpleGraph α) [DecidableRel G.Adj]
       ∑ x ∈ Iᶜ, (Gᶜ.degree x : ℝ) ^ 2 := by
   classical
   have hLa : maxLocalIndep G ≤ G.indepNum := maxLocalIndep_le_indepNum G
+  have hLaR : (maxLocalIndep G : ℝ) ≤ (G.indepNum : ℝ) := by exact_mod_cast hLa
   calc
     (Iᶜ.card : ℝ) * ((G.indepNum : ℝ) - (maxLocalIndep G : ℝ)) ^ 2 =
         ∑ x ∈ Iᶜ, ((G.indepNum : ℝ) - (maxLocalIndep G : ℝ)) ^ 2 := by simp
@@ -68,8 +69,7 @@ lemma outside_sq_sum_lower (G : SimpleGraph α) [DecidableRel G.Adj]
       have hbR : (G.indepNum : ℝ) ≤ (maxLocalIndep G : ℝ) + (Gᶜ.degree x : ℝ) := by
         exact_mod_cast hb
       have hd : 0 ≤ (Gᶜ.degree x : ℝ) := by positivity
-      have hdiff : 0 ≤ (G.indepNum : ℝ) - (maxLocalIndep G : ℝ) := by
-        exact_mod_cast Nat.sub_nonneg.mpr hLa
+      have hdiff : 0 ≤ (G.indepNum : ℝ) - (maxLocalIndep G : ℝ) := by linarith
       nlinarith
 
 lemma inside_cauchy (G : SimpleGraph α) [DecidableRel G.Adj] (I : Finset α) :
@@ -117,7 +117,7 @@ theorem scaled_norm_lower_bound (G : SimpleGraph α) [DecidableRel G.Adj]
     rw [← Finset.sum_add_sum_compl]
   have hnorm : (degreeL2Norm Gᶜ) ^ 2 = ∑ v, (Gᶜ.degree v : ℝ) ^ 2 := by
     unfold degreeL2Norm
-    rw [sq_sqrt]
+    rw [Real.sq_sqrt]
     positivity
   rw [hI.card_eq] at hBsq
   dsimp [B] at hBsq ⊢
