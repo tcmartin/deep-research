@@ -1,12 +1,11 @@
 import Mathlib
-import FormalConjectures.WrittenOnTheWallII.GraphConjecture100
 
 namespace Wowii100
 
 open SimpleGraph
 open scoped BigOperators
 
-/-- The arithmetic core of the proof.  It is stated without square roots or division:
+/-- The arithmetic core of the proof. It is stated without square roots or division:
 `a * T^2 < P`, where `P/a` is the lower bound for the squared complement-degree norm. -/
 theorem arithmetic_core (a L m : ℕ)
     (ha : 2 ≤ a) (hL1 : 1 ≤ L) (hLa : L ≤ a) (ham : a ≤ m * L) :
