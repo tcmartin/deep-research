@@ -1,20 +1,17 @@
-import Mathlib
-
-/-! Temporary exact-definition mirror for fast local iteration.
-The final verification switches back to google-deepmind/formal-conjectures at commit
-2411d22e1bd550d050d0eac6c1fb379a76a3e7c5. -/
+import Wowii100Full.Final
 
 open Classical SimpleGraph
-open scoped BigOperators
 
-namespace SimpleGraph
+namespace WrittenOnTheWallII.GraphConjecture100
 
-variable {α : Type*} [Fintype α] [DecidableEq α]
+variable {α : Type*} [Fintype α] [DecidableEq α] [Nontrivial α]
 
-noncomputable def indepNeighborsCard (G : SimpleGraph α) [DecidableRel G.Adj] (v : α) : ℕ :=
-  (G.induce (G.neighborSet v)).indepNum
+/-- WOWII / Graffiti.pc Conjecture 100, in the exact statement shape of the
+Google DeepMind Formal Conjectures source. -/
+theorem conjecture100 (G : SimpleGraph α) [DecidableRel G.Adj] (h : G.Connected) :
+    let maxL := (Finset.univ.image (indepNeighborsCard G)).max' (by simp)
+    (G.indepNum : ℝ) ≤
+      ⌈((maxL : ℝ) + (1 / 2) * (degreeL2Norm Gᶜ : ℝ)) / 2⌉ := by
+  exact Wowii100Full.full_conjecture100 G h
 
-noncomputable def degreeL2Norm (G : SimpleGraph α) [DecidableRel G.Adj] : ℝ :=
-  Real.sqrt (∑ v, (G.degree v : ℝ) ^ 2)
-
-end SimpleGraph
+end WrittenOnTheWallII.GraphConjecture100
