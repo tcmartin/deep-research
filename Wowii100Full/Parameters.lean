@@ -48,6 +48,19 @@ lemma one_le_maxLocalIndep_of_connected [Nontrivial α]
     simpa [indepNeighborsCard] using hle
   exact hlocal.trans (local_le_maxLocalIndep G v)
 
+lemma degree_sum_le_outside_mul_maxLocal
+    (G : SimpleGraph α) [DecidableRel G.Adj]
+    (I : Finset α) (hI : G.IsIndepSet I) :
+    (∑ i ∈ I, G.degree i) ≤ Iᶜ.card * maxLocalIndep G := by
+  classical
+  rw [degree_sum_eq_cross_sum G I hI]
+  calc
+    (∑ x ∈ Iᶜ, crossCount G I x) ≤ ∑ x ∈ Iᶜ, maxLocalIndep G := by
+      apply Finset.sum_le_sum
+      intro x hx
+      exact (crossCount_le_local G I hI x).trans (local_le_maxLocalIndep G x)
+    _ = Iᶜ.card * maxLocalIndep G := by simp
+
 /-- For a maximum independent set `I`, if `m` is the number of vertices outside `I`
 and `L` is the maximum neighborhood independence number, connectedness gives `α ≤ mL`. -/
 lemma indepNum_le_outside_mul_maxLocal [Nontrivial α]
@@ -65,16 +78,7 @@ lemma indepNum_le_outside_mul_maxLocal [Nontrivial α]
         apply Finset.sum_le_sum
         intro i hi
         exact hdeg i hi
-  have hcross := degree_sum_eq_cross_sum G I hI.isIndepSet
-  have hupper : (∑ x ∈ Iᶜ, crossCount G I x) ≤ Iᶜ.card * maxLocalIndep G := by
-    calc
-      (∑ x ∈ Iᶜ, crossCount G I x) ≤ ∑ x ∈ Iᶜ, maxLocalIndep G := by
-        apply Finset.sum_le_sum
-        intro x hx
-        exact (crossCount_le_local G I hI.isIndepSet x).trans
-          (local_le_maxLocalIndep G x)
-      _ = Iᶜ.card * maxLocalIndep G := by simp
   rw [hI.card_eq]
-  exact hlower.trans (hcross.le.trans hupper)
+  exact hlower.trans (degree_sum_le_outside_mul_maxLocal G I hI.isIndepSet)
 
 end Wowii100Full
