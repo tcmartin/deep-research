@@ -1,0 +1,11 @@
+name = "graffiti100"
+version = "0.1.0"
+defaultTargets = ["Graffiti100"]
+
+[[require]]
+name = "formal_conjectures"
+git = "https://github.com/google-deepmind/formal-conjectures.git"
+rev = "2411d22e1bd550d050d0eac6c1fb379a76a3e7c5"
+
+[[lean_lib]]
+name = "Graffiti100"
