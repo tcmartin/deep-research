@@ -1,0 +1,17 @@
+name: WOWII Conjecture 100 Lean check
+
+on:
+  push:
+    branches:
+      - research/wowii-conjecture-100-lean
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          build: true
+          use-github-cache: true
