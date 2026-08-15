@@ -18,6 +18,7 @@ jobs:
             ~/.elan
             .lake/packages
           key: wowii100-lean427-mathlib-a3a10db-v1
+          save-always: true
       - name: Install Lean
         run: |
           if [ ! -x "$HOME/.elan/bin/lean" ]; then
