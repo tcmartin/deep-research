@@ -5,7 +5,7 @@ namespace Wowii100Full
 open SimpleGraph
 open scoped BigOperators
 
-variable {α : Type*} [Fintype α] [DecidableEq α]
+variable {α : Type*} [Fintype α] [DecidableEq α] [Nonempty α]
 
 noncomputable def complCrossCount (G : SimpleGraph α) [DecidableRel G.Adj]
     (I : Finset α) (x : α) : ℕ :=
@@ -50,7 +50,6 @@ lemma card_le_cross_add_compl_degree (G : SimpleGraph α) [DecidableRel G.Adj]
   rw [← cross_add_complCross_eq_card G I hx]
   exact Nat.add_le_add_left (complCrossCount_le_degree G I x) _
 
-/-- Pointwise complement-degree bound for vertices outside a maximum independent set. -/
 lemma outside_compl_degree_bound (G : SimpleGraph α) [DecidableRel G.Adj]
     (I : Finset α) (hI : G.IsNIndepSet G.indepNum I) {x : α} (hx : x ∈ Iᶜ) :
     G.indepNum ≤ maxLocalIndep G + Gᶜ.degree x := by
